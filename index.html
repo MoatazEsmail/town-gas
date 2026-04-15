@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنتاجية قسم التحويلات والمداخن – تاون جاس</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen full-center">
+        <div class="login-card">
+            <div class="logo">
+                <img src="logo.png" alt="شعار تاون جاس" class="login-logo-img">
+            </div>
+            <h1>تاون جاس</h1>
+            <h2>إنتاجية قسم التحويلات والمداخن</h2>
+            <p>منطقة مصر الجديدة – إدارة العمليات</p>
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="username">اسم المستخدم</label>
+                    <select id="username" required>
+                        <option value="" disabled selected>اختر المستخدم...</option>
+                        <option value="admin">معتز إسماعيل (مشرف)</option>
+                        <option value="tech1">عبده يوسف (مداخن)</option>
+                        <option value="tech2">محمود الزهري (مداخن)</option>
+                        <option value="tech3">عبد التواب الجبالي (مداخن)</option>
+                        <option value="tech4">سيد صلاح (تحويلات)</option>
+                        <option value="tech5">حسن محمد (تحويلات)</option>
+                        <option value="tech6">عبد الرحمن الفولي (تحويلات)</option>
+                        <option value="tech7">محمود سويلم (تحويلات)</option>
+                        <option value="viewer1">م/ محمد سامي (الباشمهندس)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="password">كلمة المرور</label>
+                    <input type="password" id="password" required placeholder="أدخل كلمة المرور">
+                </div>
+                <button type="submit" class="btn primary">تسجيل الدخول</button>
+                <div id="login-error" class="error-msg hidden">بيانات غير صحيحة!</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app-screen" class="screen hidden">
+        <!-- Sidebar / Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="brand">
+                    <img src="logo.png" alt="شعار تاون جاس" class="header-logo-img">
+                    <div>
+                        <h1>تاون جاس - مصر الجديدة</h1>
+                        <span>قسم التحويلات والمداخن</span>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <input type="month" id="month-filter" />
+                    <button id="show-reports-btn" class="btn primary" title="تقارير التقييم">
+                        <i class="fa-solid fa-trophy"></i> التقييم والترتيب
+                    </button>
+                    <button id="export-excel-btn" class="btn outline" title="تصدير Excel" style="display: none;">
+                        <i class="fa-solid fa-file-excel"></i> تصدير
+                    </button>
+                    <div class="user-profile">
+                        <span id="current-user-name">اسم المستخدم</span>
+                        <span id="current-user-role" class="badge">الفني</span>
+                    </div>
+                    <button id="logout-btn" class="btn icon-btn"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <main class="app-main">
+            <!-- Stats overview -->
+            <section class="stats-overview" id="admin-stats" style="display: none;">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-wind"></i></div>
+                    <div class="stat-info">
+                        <h3>إجمالي المداخن</h3>
+                        <p id="total-chimney-stat">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange"><i class="fa-solid fa-house-chimney-window"></i></div>
+                    <div class="stat-info">
+                        <h3>تحويل منزلي</h3>
+                        <p id="total-domestic-stat">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple" style="background: #ede7f6; color: #673ab7; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;"><i class="fa-solid fa-shop"></i></div>
+                    <div class="stat-info">
+                        <h3>تحويل تجاري</h3>
+                        <p id="total-commercial-stat">0</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Month Title Display -->
+            <h2 id="current-month-display" style="text-align:center; margin-bottom: 1.5rem; color: var(--primary-color); font-weight: bold; font-size: 1.8rem; background: var(--card-bg); padding: 1rem; border-radius: var(--radius); box-shadow: var(--shadow);">
+                إنتاجية شهر ...
+            </h2>
+
+            <!-- Quick Add Form (Visible outside) -->
+            <section class="add-record-section" id="quick-add-section" style="margin-bottom: 2rem;">
+                <h3><i class="fa-solid fa-plus-circle"></i> إضافة إنتاجية يومية</h3>
+                <form id="record-form">
+                    <div class="form-row">
+                        <div class="input-group" id="tech-select-group" style="display:none; min-width: 200px;">
+                            <label for="record-tech">الفني</label>
+                            <select id="record-tech">
+                                <option value="" disabled selected>اختر الفني...</option>
+                                <option value="tech1">عبده يوسف (مداخن)</option>
+                                <option value="tech2">محمود الزهري (مداخن)</option>
+                                <option value="tech3">عبد التواب الجبالي (مداخن)</option>
+                                <option value="tech4">سيد صلاح (تحويلات)</option>
+                                <option value="tech5">حسن محمد (تحويلات)</option>
+                                <option value="tech6">عبد الرحمن الفولي (تحويلات)</option>
+                                <option value="tech7">محمود سويلم (تحويلات)</option>
+                            </select>
+                        </div>
+                        <div class="input-group" style="min-width: 150px;">
+                            <label for="record-date">التاريخ</label>
+                            <input type="date" id="record-date" required>
+                        </div>
+                        
+                        <div style="width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1rem; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                            <div class="input-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.85rem;">تحويل منزلي</label>
+                                <input type="number" id="qty-domestic" min="0" value="0">
+                            </div>
+                            <div class="input-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.85rem;">استبدال منزلي</label>
+                                <input type="number" id="qty-replace" min="0" value="0">
+                            </div>
+                            <div class="input-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.85rem;">تحويل تجاري</label>
+                                <input type="number" id="qty-commercial" min="0" value="0">
+                            </div>
+                            <div class="input-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.85rem;">مداخن</label>
+                                <input type="number" id="qty-chimney" min="0" value="0">
+                            </div>
+                            <div class="input-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.85rem;">هوايات</label>
+                                <input type="number" id="qty-vent" min="0" value="0">
+                            </div>
+                            <div class="input-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.85rem; color:var(--red-danger);">إجازات (أيام)</label>
+                                <input type="number" id="qty-vacation" min="0" max="1" value="0">
+                            </div>
+                        </div>
+
+                        <div class="input-group btn-group align-bottom" style="width: 100%;">
+                            <button type="submit" class="btn primary" style="font-size: 1.1rem; padding: 1rem;">سجل الآن</button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Loading overlay -->
+            <div id="loading-data" class="loading-data hidden">
+                <i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل البيانات...
+            </div>
+
+            <!-- Technicians Grid -->
+            <section class="tech-grid" id="tech-grid">
+                <!-- Cards injected here via JS -->
+            </section>
+        </main>
+    </div>
+
+    <!-- Technician Details Modal -->
+    <div id="tech-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-tech-name">اسم الفني</h2>
+                <button class="close-btn" id="close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="tech-stats-bar">
+                    <div class="tech-stat">الهدف المتبقي: <strong id="modal-target-rem">0</strong></div>
+                    <div class="tech-stat">المحقق الفعلي: <strong id="modal-target-done">0</strong></div>
+                    <div class="tech-stat">النسبة: <strong id="modal-target-perc">0%</strong></div>
+                    <div class="tech-stat">الإجازات: <strong id="modal-target-vac" style="color:var(--red-danger)">0</strong></div>
+                </div>
+
+                <!-- The add form was moved to the main dashboard -->
+
+                <!-- Records Table -->
+                <div class="records-table-container">
+                    <h3>سجل الإنتاجية <span id="records-month-label"></span></h3>
+                    <table class="records-table">
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>تحويل/استبدال</th>
+                                <th>تجاري</th>
+                                <th>مداخن/هوايات</th>
+                                <th>إجازات</th>
+                                <th>مُعتمدة</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="records-tbody">
+                            <!-- Injected rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Evaluation & Reports Modal -->
+    <div id="report-modal" class="modal hidden">
+        <div class="modal-content report-modal-content">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-ranking-star"></i> لوحة شرف الفنيين</h2>
+                <button class="close-btn" id="close-report-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="report-tabs">
+                    <button class="report-tab active" data-type="month">تقرير الشهر الجاري</button>
+                    <button class="report-tab" data-type="year">تقرير العام الحالي</button>
+                </div>
+
+                <div class="leaderboard-container">
+                    <div id="podium-container" class="podium-container"></div>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>المركز</th>
+                                <th>الفني</th>
+                                <th>النوع</th>
+                                <th>الإنجاز</th>
+                                <th>الهدف</th>
+                                <th>النسبة</th>
+                                <th>إجازات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-tbody">
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+
+    <!-- App Scripts -->
+    <script src="js/logic.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
