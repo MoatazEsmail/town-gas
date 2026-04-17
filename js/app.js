@@ -138,7 +138,7 @@ function handleLogin(e) {
         currentUser = { id: 'admin', role: 'admin', name: 'معتز إسماعيل', techData: null };
         finishLogin();
     } else if (userId === 'viewer1' && pass === VIEWER_PASSWORD) {
-        currentUser = { id: 'viewer1', role: 'viewer', name: 'م/ محمد سامي', techData: null };
+        currentUser = { id: 'viewer1', role: 'viewer', name: 'المدير', techData: null };
         finishLogin();
     } else if (TECH_DATA[userId] && pass === (TECH_DATA[userId].password || DEFAULT_TECH_PASSWORD)) {
         currentUser = { id: userId, role: 'tech', name: TECH_DATA[userId].name, techData: TECH_DATA[userId] };
